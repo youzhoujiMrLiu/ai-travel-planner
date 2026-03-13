@@ -39,7 +39,6 @@ function saveChunks(chunks) {
     JSON.stringify({
       id: `chunk_${String(idx + 1).padStart(5, '0')}`,
       ...chunk,
-      createdAt: new Date().toISOString(),
     })
   );
 

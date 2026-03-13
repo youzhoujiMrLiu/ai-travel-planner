@@ -114,6 +114,56 @@ const SECTION_TYPES = {
   '尊重': 'notice',
 };
 
+/**
+ * 英文 Wikivoyage 标准章节名称 → 知识类型映射
+ * 参考：https://en.wikivoyage.org/wiki/Wikivoyage:Sections
+ */
+const SECTION_TYPES_EN = {
+  // Overview / background
+  'Understand':    'guide',
+  'History':       'guide',
+  'Orientation':   'guide',
+  'Neighborhoods': 'guide',
+  'Districts':     'guide',
+  'Go next':       'guide',
+  // Getting there & around
+  'Get in':        'transport',
+  'Get around':    'transport',
+  'By plane':      'transport',
+  'By train':      'transport',
+  'By bus':        'transport',
+  'By car':        'transport',
+  'By boat':       'transport',
+  'By ferry':      'transport',
+  'By bicycle':    'transport',
+  'By taxi':       'transport',
+  'By foot':       'transport',
+  // Sights & activities
+  'See':           'attraction',
+  'Do':            'activity',
+  'Events':        'activity',
+  'Festivals':     'activity',
+  // Shopping
+  'Buy':           'shopping',
+  // Food & drink
+  'Eat':           'food',
+  'Drink':         'food',
+  // Accommodation
+  'Sleep':         'accommodation',
+  'Stay safe':     'notice',
+  'Stay healthy':  'notice',
+  'Respect':       'notice',
+  'Cope':          'notice',
+  // Communication
+  'Connect':       'contact',
+  'Contact':       'contact',
+  'Communication': 'contact',
+  'Currency':      'contact',
+  'Money':         'contact',
+  'Language':      'contact',
+  'Visas':         'notice',
+};
+
 // 爬虫行为配置
 const CRAWL_CONFIG = {
   /** 每次请求之间的最小间隔（毫秒），遵守 Wikimedia API 政策 */
@@ -145,4 +195,4 @@ const CRAWL_CONFIG = {
 const MAX_CHUNK_LENGTH = 800;
 const CHUNK_OVERLAP = 120;
 
-module.exports = { CITIES, SECTION_TYPES, CRAWL_CONFIG, MAX_CHUNK_LENGTH, CHUNK_OVERLAP };
+module.exports = { CITIES, SECTION_TYPES, SECTION_TYPES_EN, CRAWL_CONFIG, MAX_CHUNK_LENGTH, CHUNK_OVERLAP };

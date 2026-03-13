@@ -32,7 +32,7 @@ const inputFile = args.find((a) => !a.startsWith('--'));
 const isDryRun  = args.includes('--dry-run');
 const useLLM    = args.includes('--llm');
 const logRejected = args.includes('--log-rejected');
-const outArg    = args[args.indexOf('--out') + 1];
+const outArg    = args.includes('--out') ? args[args.indexOf('--out') + 1] : undefined;
 
 if (!inputFile) {
   console.error('用法: node filter.js <input.jsonl> [--out output.jsonl] [--dry-run] [--llm] [--log-rejected]');
@@ -66,6 +66,12 @@ function cleanContent(text) {
     .replace(/\.mw-parser-output\b[^{\n]*/g, '')
     // 移除 [dead link] 等维基标注
     .replace(/\[dead link\]/gi, '')
+    // 策略B：移除 Wikivoyage 渲染噪声（与 contentParser 保持一致，双重保险）
+    .replace(/电话号码格式无效/g, '')
+    .replace(/主条目：/g, '')
+    .replace(/\(\)\s*/g, '')
+    // 移除孤立 Unicode 代理字符（U+D800–U+DFFF），双重保险
+    .replace(/[\uD800-\uDFFF]/g, '')
     // 清理多余空白
     .replace(/\s{2,}/g, ' ')
     .trim();
@@ -161,6 +167,24 @@ function staticFilter(chunk) {
     for (const pattern of HISTORY_CONTENT_TRIGGERS) {
       if (pattern.test(chunk.content || '')) {
         return { keep: false, reason: `历史政治叙述: ${pattern}` };
+      }
+    }
+  }
+
+  // 4. 内容过短，无实质信息（清洗噪声后仍然太短的 chunk）
+  const usefulLen = (chunk.content || '').replace(/\s/g, '').length;
+  if (usefulLen < 50) {
+    return { keep: false, reason: '内容过短（< 50 字符）' };
+  }
+
+  // 5. 中文字符密度过低（纯路段编号、高速公路列表等）—— 仅对中文 chunk
+  //    英文 chunk（lang: 'en'）跳过此检测
+  if (!chunk.lang || chunk.lang === 'zh') {
+    const contentNoSpace = (chunk.content || '').replace(/\s/g, '');
+    if (contentNoSpace.length > 80) {
+      const zhChars = (contentNoSpace.match(/[\u4e00-\u9fff]/g) || []).length;
+      if (zhChars / contentNoSpace.length < 0.25) {
+        return { keep: false, reason: '中文字符密度过低（疑似纯编号/路段列表）' };
       }
     }
   }

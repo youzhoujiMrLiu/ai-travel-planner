@@ -260,10 +260,10 @@ class RagService {
    *   西湖景区门票免费，可步行游览白堤、苏堤...
    *
    * @param {Array}  chunks
-   * @param {number} [maxCharsPerChunk=400] 每条最大字符数（控制总 token 量）
+   * @param {number} [maxCharsPerChunk=600] 每条最大字符数（控制总 token 量）
    * @returns {string}
    */
-  buildContext(chunks, maxCharsPerChunk = 400) {
+  buildContext(chunks, maxCharsPerChunk = 600) {
     if (!chunks || chunks.length === 0) return '';
 
     const lines = ['=== 参考资料（来自旅游知识库）==='];

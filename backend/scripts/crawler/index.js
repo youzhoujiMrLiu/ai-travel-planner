@@ -121,23 +121,23 @@ async function main() {
       const cityData = await crawlCity(city);
       let chunks     = cityData ? parseCityData(cityData) : [];
 
-      // 1b. 英文回退：中文片段不足时尝试英文页面补充
-      if (chunks.length < enThreshold && enTitle) {
-        console.log(`    中文片段仅 ${chunks.length} 个，尝试英文回退 (${enTitle})...`);
+      // 1b. 英文补充：只要有对应英文页面标题，就同步抓取并追加
+      //     不再限制为"兜底"，因为英文 Wikivoyage 往往比中文详细得多，
+      //     双语并存能覆盖更多检索场景（中文用户问中文、英文内容更丰富时也能召回）
+      if (enTitle) {
+        const enLabel = chunks.length < enThreshold ? '英文回退' : '英文补充';
+        console.log(`    ${enLabel}：抓取英文页面 (${enTitle})...`);
         const enData = await crawlCityEn(enTitle);
         if (enData) {
-          // 复用 contentParser（支持英文 HTML 结构一致）
-          // 把城市名替换成中文名，保持一致性
           const enDataWithZh = { ...enData, city };
           const enChunks     = parseCityData(enDataWithZh).map((c) => ({
             ...c,
-            lang:   'en',
-            source: 'wikivoyage-en',
+            lang: 'en',
           }));
           if (enChunks.length > 0) {
             chunks = [...chunks, ...enChunks];
             stats.enFallback++;
-            console.log(`    ✓ 英文回退补充 ${enChunks.length} 个片段`);
+            console.log(`    ✓ ${enLabel}补充 ${enChunks.length} 个英文片段`);
           }
         }
       }
@@ -163,12 +163,7 @@ async function main() {
     : SPECIAL_NOTICES;
 
   if (noticesToMerge.length > 0) {
-    const decoratedNotices = noticesToMerge.map((n) => ({
-      ...n,
-      source:  'manual',
-      sourceUrl: null,
-      license: '本项目整理',
-    }));
+    const decoratedNotices = noticesToMerge.map((n) => ({ ...n }));
     allChunks.push(...decoratedNotices);
     console.log(`\n✓ 合并静态注意事项：${decoratedNotices.length} 条`);
   }
